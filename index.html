@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎓 SGI Cloud Pro v8.2 (Fixed)</title>
+    <title>🎓 SGI Cloud Pro v8.3</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -58,7 +58,8 @@
         @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
         /* --- WIDGET SYSTEM --- */
-        .widget-grid-top { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px; }
+        /* CAMBIO: Grid Top ajustado a 3fr 1fr para reducir tamaño de Tarea Cumplida */
+        .widget-grid-top { display: grid; grid-template-columns: 3fr 1fr; gap: 15px; margin-bottom: 15px; }
         .widget-grid-mid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
         
         .widget-card { background: var(--bg-card); padding: 15px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.03); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
@@ -69,9 +70,9 @@
         .quote-icon { font-size: 2rem; opacity: 0.8; background: rgba(255,255,255,0.2); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .quote-text { font-style: italic; font-size: 1.1rem; line-height: 1.4; font-weight: 500; }
 
-        /* Tarea */
-        .task-icon { font-size: 1.5rem; color: var(--success); background: rgba(16, 185, 129, 0.1); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
-        .task-progress-bg { background: var(--border); height: 8px; border-radius: 4px; width: 100%; overflow: hidden; margin-top: auto; }
+        /* Tarea Compacta (CAMBIOS AQUI) */
+        .task-icon { font-size: 1.2rem; color: var(--success); background: rgba(16, 185, 129, 0.1); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; }
+        .task-progress-bg { background: var(--border); height: 6px; border-radius: 4px; width: 100%; overflow: hidden; margin-top: auto; }
         .task-progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 1s ease; border-radius: 4px; }
 
         /* Countdown */
@@ -87,20 +88,10 @@
         .quick-link i { font-size: 1.2rem; margin-bottom: 4px; }
         .quick-link span { font-size: 0.7rem; font-weight: 600; }
 
-        /* Kudos (Logros) */
-        .widget-kudos { background: linear-gradient(to bottom right, #fff, #f0f9ff); }
-        .kudos-input { border: none; background: transparent; border-bottom: 2px solid var(--border); width: 100%; padding: 5px; font-size: 0.9rem; margin-bottom: 10px; transition: 0.3s; }
-        .kudos-input:focus { border-bottom-color: var(--primary); outline: none; }
-        .btn-celebrate { width: 100%; background: linear-gradient(45deg, #f59e0b, #fbbf24); border: none; color: white; font-weight: 700; border-radius: 8px; padding: 6px; cursor: pointer; transition: 0.2s; }
-        .btn-celebrate:hover { transform: scale(1.02); filter: brightness(110%); }
-
         /* Efemerides */
         .widget-event { border-left: 4px solid #8b5cf6; }
         .event-date { font-size: 0.8rem; font-weight: 700; color: #8b5cf6; text-transform: uppercase; margin-bottom: 5px; }
         .event-title { font-size: 1.1rem; font-weight: 600; color: var(--text-main); }
-
-        /* Canvas Confetti */
-        #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
 
         /* DASHBOARD STATS */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem; margin-bottom: 1rem; }
@@ -182,7 +173,6 @@
     <div id="notification" class="notification"><i class="fas fa-info-circle"></i> <span id="notifText"></span></div>
     <div id="ganttTooltip" class="custom-tooltip"></div>
     <div id="calendarTooltip" class="custom-tooltip"></div>
-    <canvas id="confetti-canvas"></canvas>
 
     <div id="bulkActionBar" class="bulk-action-bar">
         <span id="bulkCount" class="bulk-count">0</span>
@@ -249,11 +239,11 @@
                         </div>
 
                         <div class="widget-card">
-                            <div style="display:flex; align-items:center; justify-content:space-between;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 5px;">
                                 <div class="task-icon"><i class="fas fa-tasks"></i></div>
-                                <div style="font-size:1.4rem; font-weight:800; color:var(--text-main);" id="widgetTaskCount">0/0</div>
+                                <div style="font-size:1.1rem; font-weight:800; color:var(--text-main);" id="widgetTaskCount">0/0</div>
                             </div>
-                            <div style="font-size:0.8rem; color:var(--text-light); font-weight:600;">Tarea Cumplida (Hoy)</div>
+                            <div style="font-size:0.7rem; color:var(--text-light); font-weight:600;">Tarea Cumplida</div>
                             <div class="task-progress-bg"><div class="task-progress-fill" id="widgetTaskBar"></div></div>
                         </div>
                     </div>
@@ -269,12 +259,6 @@
                             <div class="event-date" id="wdgEventDate">--/--</div>
                             <div class="event-title" id="wdgEventTitle">Sin eventos próximos</div>
                             <div style="font-size:0.8rem; color:var(--text-light); margin-top:5px;">Efeméride Escolar</div>
-                        </div>
-
-                        <div class="widget-card widget-kudos">
-                            <div style="font-weight:700; color:#d97706; margin-bottom:5px;"><i class="fas fa-trophy"></i> Celebrar Logro</div>
-                            <input type="text" id="kudosInput" class="kudos-input" placeholder="¿Qué lograste hoy?">
-                            <button class="btn-celebrate" onclick="window.celebrateLogro()">¡Celebrar!</button>
                         </div>
 
                         <div class="widget-card">
@@ -471,10 +455,9 @@
         activities: [], 
         cases: [], 
         notes: [], 
-        kudos: [], 
         config: { primary: '#6366f1', sidebar: '#1e293b', backgrounds: {}, alarmType: 'nuclear' }, 
         lastUpdated: 0, 
-        version: "8.2" 
+        version: "8.3" 
     };
     
     let currentDate = new Date();
@@ -506,7 +489,7 @@
             const qEl = document.getElementById('widgetQuote');
             if(qEl) qEl.textContent = `"${dailyQuotes[dayOfMonth % dailyQuotes.length]}"`;
 
-            // 2. Tarea Cumplida
+            // 2. Tarea Cumplida (COMPACT)
             const now = new Date();
             const todayStr = now.toISOString().split('T')[0];
             const nowMinutes = now.getHours() * 60 + now.getMinutes();
@@ -558,40 +541,6 @@
         } catch(err) {
             console.warn("Widget error ignored:", err);
         }
-    }
-
-    // --- CELEBRATE LOGRO ---
-    window.celebrateLogro = function() {
-        const input = document.getElementById('kudosInput');
-        if (input && input.value.trim() !== "") {
-            db.kudos = db.kudos || [];
-            db.kudos.push({date: new Date().toISOString(), text: input.value});
-            window.saveData();
-            input.value = "";
-            showNotification("¡Logro registrado!", "success");
-            fireConfetti();
-        }
-    };
-
-    function fireConfetti() {
-        const canvas = document.getElementById('confetti-canvas');
-        if(!canvas) return;
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        const pieces = [];
-        const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f'];
-        for(let i=0; i<100; i++) pieces.push({x: Math.random()*canvas.width, y: -10, color: colors[Math.floor(Math.random()*colors.length)], r: 5+Math.random()*5, d: Math.random()*10+5});
-        
-        let interval = setInterval(() => {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            pieces.forEach(p => {
-                p.y += p.d;
-                ctx.fillStyle = p.color;
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
-            });
-            if(pieces[0].y > canvas.height) { clearInterval(interval); ctx.clearRect(0,0,canvas.width, canvas.height); }
-        }, 30);
     }
 
     // --- ALARM SYSTEM (FIXED) ---
@@ -691,7 +640,6 @@
         if (!Array.isArray(data.activities)) data.activities = [];
         if (!Array.isArray(data.cases)) data.cases = [];
         if (!Array.isArray(data.notes)) data.notes = [];
-        if (!Array.isArray(data.kudos)) data.kudos = [];
         if (!data.config) data.config = { primary: '#6366f1', backgrounds: {}, alarmType: 'nuclear' };
         if (!data.config.backgrounds) data.config.backgrounds = {};
         if (!data.lastUpdated) data.lastUpdated = Date.now();
