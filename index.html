@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎓 SGI Cloud Pro v8.6 (Linked)</title>
+    <title>🎓 SGI Cloud Pro v8.7 (Custom)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -25,7 +25,7 @@
 
         /* LAYOUT */
         .container { height: 100%; display: flex; flex-direction: column; }
-        .main-header { background: var(--bg-glass); padding: 0.8rem 1.5rem; backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 50; display: flex; justify-content: space-between; align-items: center; height: 60px; }
+        .main-header { background: var(--bg-glass); padding: 0.8rem 1.5rem; backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 50; display: flex; justify-content: space-between; align-items: center; height: 70px; position: relative; }
         .app-wrapper { display: flex; flex: 1; overflow: hidden; height: 100%; }
         .sidebar { width: 240px; background: var(--bg-sidebar); color: #cbd5e1; display: flex; flex-direction: column; flex-shrink: 0; border-right: 1px solid var(--border); height: 100%; overflow: hidden; }
         .sidebar-content { padding: 1rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1.5rem; }
@@ -47,6 +47,12 @@
         
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
+        /* HEADER CUSTOMS */
+        .profile-pic-container { width: 45px; height: 45px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(99, 102, 241, 0.1); border: 2px solid var(--primary); }
+        .profile-pic-img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .header-logo-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-height: 50px; max-width: 150px; display: none; }
+        .app-subtitle { font-size: 0.8rem; font-weight: 600; color: var(--text-light); line-height: 1.2; }
+        
         /* CONNECTION STATUS */
         .connection-indicator { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; transition: all 0.3s ease; border: 1px solid transparent; }
         .status-online { background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.2); }
@@ -184,12 +190,20 @@
 
     <div class="container">
         <header class="main-header">
-            <div style="display: flex; align-items: center; gap: 10px;">
+            <img id="headerLogoCenter" class="header-logo-center" src="" alt="Logo">
+            <div style="display: flex; align-items: center; gap: 10px; position:relative; z-index:2;">
                 <button id="toggleSidebar" class="btn-secondary" style="border:none; background:transparent; font-size:1.2rem; margin-right:10px;"><i class="fas fa-bars"></i></button>
-                <div id="appIconContainer"><i class="fas fa-graduation-cap" style="font-size: 1.5rem; color: var(--primary);"></i></div>
-                <div><h1>Convivencia Cloud</h1><p id="currentDate">Cargando...</p></div>
+                <div class="profile-pic-container">
+                    <i class="fas fa-graduation-cap" id="defaultIcon" style="font-size: 1.5rem; color: var(--primary);"></i>
+                    <img id="profilePicImg" class="profile-pic-img" src="" alt="Perfil">
+                </div>
+                <div>
+                    <h1>Convivencia Cloud</h1>
+                    <div id="appSubtitleDisplay" class="app-subtitle"></div>
+                    <p id="currentDate" style="font-size: 0.75rem; opacity: 0.8;">Cargando...</p>
+                </div>
             </div>
-            <div style="display:flex; gap:10px; align-items:center;">
+            <div style="display:flex; gap:10px; align-items:center; position:relative; z-index:2;">
                 <button class="btn btn-sync" onclick="window.manualSync()" title="Forzar Sincronización">
                     <i class="fas fa-sync-alt" id="syncIcon"></i> Sincronizar
                 </button>
@@ -391,6 +405,25 @@
             <div class="modal-header">Configuración <button style="background:none; border:none; font-size:1.5rem;" onclick="window.closeModals()">&times;</button></div>
             <div class="modal-body">
                 
+                <h3><i class="fas fa-id-card"></i> Personalización de Cabecera</h3>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                    <div>
+                        <label class="form-label">Foto Perfil (Reemplaza birrete)</label>
+                        <input type="file" onchange="window.handleProfileUpload(this)" accept="image/*" class="form-control">
+                    </div>
+                    <div>
+                        <label class="form-label">Logo Institucional (Centro)</label>
+                        <input type="file" onchange="window.handleLogoUpload(this)" accept="image/*" class="form-control">
+                    </div>
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label class="form-label">Nombre/Subtítulo (Bajo el título)</label>
+                    <input type="text" id="configSubtitle" class="form-control" placeholder="Ej: Encargado de Convivencia" onchange="window.saveSubtitle(this.value)">
+                </div>
+                <button class="btn btn-danger" onclick="window.clearCustomImages()" style="width:100%; margin-bottom:20px;">Borrar Imágenes Cabecera</button>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border);">
+                
                 <h3><i class="fas fa-bell"></i> Alarmas</h3>
                 <div style="margin-bottom:20px;">
                     <select id="configAlarmType" class="form-control" onchange="window.saveConfigAlarm(this.value)">
@@ -463,9 +496,9 @@
         activities: [], 
         cases: [], 
         notes: [], 
-        config: { primary: '#6366f1', sidebar: '#1e293b', backgrounds: {}, alarmType: 'nuclear' }, 
+        config: { primary: '#6366f1', sidebar: '#1e293b', backgrounds: {}, alarmType: 'nuclear', profilePic: null, logo: null, subtitle: '' }, 
         lastUpdated: 0, 
-        version: "8.6" 
+        version: "8.7" 
     };
     
     let currentDate = new Date();
@@ -687,7 +720,7 @@
         if (!Array.isArray(data.activities)) data.activities = [];
         if (!Array.isArray(data.cases)) data.cases = [];
         if (!Array.isArray(data.notes)) data.notes = [];
-        if (!data.config) data.config = { primary: '#6366f1', backgrounds: {}, alarmType: 'nuclear' };
+        if (!data.config) data.config = { primary: '#6366f1', backgrounds: {}, alarmType: 'nuclear', profilePic: null, logo: null, subtitle: '' };
         if (!data.config.backgrounds) data.config.backgrounds = {};
         if (!data.lastUpdated) data.lastUpdated = Date.now();
         return data;
@@ -722,7 +755,7 @@
     }
     window.saveData = function() { db.lastUpdated = Date.now(); saveLocalData(true); refreshAllViews(); };
 
-    // --- FONDOS Y GESTIÓN DE DATOS ---
+    // --- FONDOS Y PERSONALIZACION ---
     window.handleBgUpload = function(input, viewName) {
         const file = input.files[0];
         if(!file) return;
@@ -736,7 +769,80 @@
         };
         reader.readAsDataURL(file);
     };
+
+    // Funciones nuevas para personalización
+    window.handleProfileUpload = function(input) {
+        const file = input.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if(!db.config) db.config={};
+            db.config.profilePic = e.target.result;
+            window.saveData();
+            showNotification("Foto perfil actualizada", "success");
+        };
+        reader.readAsDataURL(file);
+    };
+
+    window.handleLogoUpload = function(input) {
+        const file = input.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if(!db.config) db.config={};
+            db.config.logo = e.target.result;
+            window.saveData();
+            showNotification("Logo actualizado", "success");
+        };
+        reader.readAsDataURL(file);
+    };
+    
+    window.saveSubtitle = function(val) {
+        if(!db.config) db.config={};
+        db.config.subtitle = val;
+        window.saveData();
+    };
+
+    window.clearCustomImages = function() {
+        if(db.config) {
+            db.config.profilePic = null;
+            db.config.logo = null;
+            db.config.subtitle = '';
+            document.getElementById('configSubtitle').value = '';
+        }
+        window.saveData();
+        showNotification("Imágenes borradas", "info");
+    };
+
     window.clearBackgrounds = function() { if(db.config) db.config.backgrounds = {}; window.saveData(); };
+    
+    function applyHeaderStyles() {
+        // Profile Pic
+        const icon = document.getElementById('defaultIcon');
+        const img = document.getElementById('profilePicImg');
+        if(db.config && db.config.profilePic) {
+            icon.style.display = 'none';
+            img.style.display = 'block';
+            img.src = db.config.profilePic;
+        } else {
+            icon.style.display = 'block';
+            img.style.display = 'none';
+        }
+
+        // Center Logo
+        const logo = document.getElementById('headerLogoCenter');
+        if(db.config && db.config.logo) {
+            logo.src = db.config.logo;
+            logo.style.display = 'block';
+        } else {
+            logo.style.display = 'none';
+        }
+
+        // Subtitle
+        const sub = document.getElementById('appSubtitleDisplay');
+        if(sub) sub.textContent = (db.config && db.config.subtitle) ? db.config.subtitle : '';
+    }
+
     function applyBackgrounds() {
         const area = document.getElementById('mainContentArea');
         if(!area) return;
@@ -820,6 +926,9 @@
 
         // Update New Widgets
         updateWidgets();
+
+        // Apply Custom Header
+        applyHeaderStyles();
 
         // Stats
         if(db.cases) {
@@ -1007,6 +1116,7 @@
     window.openConfigModal = function() { 
         document.getElementById('githubToken').value = GITHUB_TOKEN; 
         if(db.config && db.config.alarmType) document.getElementById('configAlarmType').value = db.config.alarmType;
+        if(db.config && db.config.subtitle) document.getElementById('configSubtitle').value = db.config.subtitle;
         if(GIST_ID) document.getElementById('currentGistIdDisplay').textContent = GIST_ID;
         document.getElementById('configModal').classList.add('active'); 
     };
