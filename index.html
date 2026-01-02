@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎓 SGI Cloud Pro v8.7 (Custom)</title>
+    <title>🎓 SGI Cloud Pro v8.8 (Turbo Sync)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -498,7 +498,7 @@
         notes: [], 
         config: { primary: '#6366f1', sidebar: '#1e293b', backgrounds: {}, alarmType: 'nuclear', profilePic: null, logo: null, subtitle: '' }, 
         lastUpdated: 0, 
-        version: "8.7" 
+        version: "8.8" 
     };
     
     let currentDate = new Date();
@@ -751,7 +751,8 @@
 
     function saveLocalData(triggerCloud = true) {
         localStorage.setItem('sgi_data', JSON.stringify(db));
-        if (triggerCloud && GITHUB_TOKEN) { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { CloudManager.upload(); }, 2000); }
+        // TURBO SYNC: Upload after 1 second (1000ms) instead of 2000ms
+        if (triggerCloud && GITHUB_TOKEN) { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { CloudManager.upload(); }, 1000); }
     }
     window.saveData = function() { db.lastUpdated = Date.now(); saveLocalData(true); refreshAllViews(); };
 
@@ -1215,8 +1216,8 @@
                 document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark'); 
             });
             
-            // Start Intervals safely - 15 seconds polling
-            setInterval(() => { if(GITHUB_TOKEN) CloudManager.sync(true); }, 15000); // Polling silent
+            // Start Intervals safely - 3 seconds polling (Rapid Sync)
+            setInterval(() => { if(GITHUB_TOKEN) CloudManager.sync(true); }, 3000); // Polling silent every 3s
             setInterval(updateWidgets, 5000);
             setInterval(checkAlarms, 30000);
             
