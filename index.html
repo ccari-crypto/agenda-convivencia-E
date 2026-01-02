@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎓 SGI Cloud Pro v8.4 (Sync Force)</title>
+    <title>🎓 SGI Cloud Pro v8.5 (Auto-Sync)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -30,8 +30,7 @@
         .sidebar { width: 240px; background: var(--bg-sidebar); color: #cbd5e1; display: flex; flex-direction: column; flex-shrink: 0; border-right: 1px solid var(--border); height: 100%; overflow: hidden; }
         .sidebar-content { padding: 1rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1.5rem; }
         .main-content { flex: 1; padding: 1.5rem; overflow-y: auto; height: 100%; background-color: var(--bg-body); background-size: cover; background-position: center; background-attachment: local; position: relative; transition: background-image 0.5s ease-in-out; }
-        .main-content::before { content: ''; position: fixed; inset: 0; background: rgba(255,255,255,0.0); pointer-events: none; z-index: 0; }
-
+        
         /* UI ELEMENTS */
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: var(--transition); border: none; font-size: 0.85rem; }
         .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
@@ -40,14 +39,14 @@
         .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
         .btn-whatsapp { background: var(--whatsapp); color: white; }
         .btn-mail { background: #EA4335; color: white; }
+        .btn-sync { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .btn-sync:hover { background: var(--success); color: white; }
+        .btn-sync.rotating i { animation: spin 1s linear infinite; }
+        
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
         .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
         
-        /* CONNECTION STATUS */
-        .connection-indicator { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; transition: all 0.3s ease; border: 1px solid transparent; }
-        .status-online { background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.2); }
-        .status-offline { background: rgba(239, 68, 68, 0.1); color: var(--danger); border-color: rgba(239, 68, 68, 0.2); }
-        .status-syncing { background: rgba(245, 158, 11, 0.1); color: var(--warning); border-color: rgba(245, 158, 11, 0.2); }
-
         /* NAV */
         .nav-category { font-size: 0.7rem; text-transform: uppercase; color: #64748b; margin-bottom: 0.5rem; padding-left: 8px; font-weight: 600; }
         .nav-item { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: transparent; border: none; color: #94a3b8; cursor: pointer; border-radius: 10px; font-weight: 500; font-family: inherit; transition: var(--transition); text-align: left; font-size: 0.9rem; }
@@ -185,6 +184,10 @@
                 <div><h1>Convivencia Cloud</h1><p id="currentDate">Cargando...</p></div>
             </div>
             <div style="display:flex; gap:10px; align-items:center;">
+                <button class="btn btn-sync" onclick="window.manualSync()" title="Forzar Sincronización">
+                    <i class="fas fa-sync-alt" id="syncIcon"></i> Sincronizar
+                </button>
+                
                 <div id="connectionStatus" class="connection-indicator status-offline" title="Estado de conexión">
                     <i class="fas fa-wifi-slash status-icon"></i> <span style="display:none; @media(min-width:600px){display:inline;}">Offline</span>
                 </div>
@@ -452,7 +455,7 @@
         notes: [], 
         config: { primary: '#6366f1', sidebar: '#1e293b', backgrounds: {}, alarmType: 'nuclear' }, 
         lastUpdated: 0, 
-        version: "8.3" 
+        version: "8.5" 
     };
     
     let currentDate = new Date();
@@ -577,6 +580,15 @@
     window.saveConfigAlarm = function(val) { if(!db.config) db.config={}; db.config.alarmType = val; window.saveData(); };
 
     // --- CLOUD MANAGER ---
+    
+    // NEW: Manual Sync Button
+    window.manualSync = async function() {
+        const icon = document.getElementById('syncIcon');
+        if(icon) icon.classList.add('fa-spin');
+        await CloudManager.sync(false); // Not silent
+        if(icon) icon.classList.remove('fa-spin');
+    };
+
     const CloudManager = {
         async findGist() {
             if (!GITHUB_TOKEN) return null;
@@ -602,9 +614,9 @@
                 document.getElementById('currentGistIdDisplay').textContent = GIST_ID;
             } catch (e) { updateStatus('offline', 'Error'); }
         },
-        async sync() {
+        async sync(silent = true) {
             if (!GITHUB_TOKEN) return;
-            updateStatus('syncing', 'Sync...');
+            if(!silent) updateStatus('syncing', 'Sync...');
             
             // Check manual override first
             const manualId = document.getElementById('manualGistId').value.trim();
@@ -616,20 +628,32 @@
             if (!GIST_ID) { GIST_ID = await this.findGist(); if(!GIST_ID){ await this.createGist(); return; } localStorage.setItem('sgi_gist_id', GIST_ID); }
             
             // Update UI with current ID
-            document.getElementById('currentGistIdDisplay').textContent = GIST_ID;
+            const disp = document.getElementById('currentGistIdDisplay');
+            if(disp) disp.textContent = GIST_ID;
 
             try {
                 const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
                 const gistData = await response.json();
                 if(gistData.files && gistData.files[CLOUD_FILENAME]) {
                     const cloudDB = JSON.parse(gistData.files[CLOUD_FILENAME].content);
+                    
+                    // Logic: If cloud is newer, take it.
                     if (cloudDB.lastUpdated > (db.lastUpdated || 0)) {
-                        db = ensureIntegrity(cloudDB); saveLocalData(false); refreshAllViews(); showNotification("Datos actualizados", "success");
-                    } else if (db.lastUpdated > (cloudDB.lastUpdated || 0)) { await this.upload(); }
+                        console.log("Downloading new data from cloud...");
+                        db = ensureIntegrity(cloudDB); 
+                        saveLocalData(false); // Save locally but don't re-upload
+                        refreshAllViews(); 
+                        if(!silent) showNotification("Datos actualizados", "success");
+                    } else if (db.lastUpdated > (cloudDB.lastUpdated || 0)) { 
+                        await this.upload(); 
+                    }
+                    
                     updateStatus('online', 'Sincronizado');
                     const st = document.getElementById('cloudStatusText'); if(st) { st.textContent = "Conectado"; st.style.color = "var(--success)"; }
                 }
-            } catch (e) { updateStatus('offline', 'Error Sync'); }
+            } catch (e) { 
+                if(!silent) updateStatus('offline', 'Error Sync'); 
+            }
         },
         async upload() {
             if (!GITHUB_TOKEN || !GIST_ID) return;
@@ -1068,7 +1092,8 @@
                 document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark'); 
             });
             
-            // Start Intervals safely
+            // Start Intervals safely - 15 seconds polling
+            setInterval(() => { if(GITHUB_TOKEN) CloudManager.sync(true); }, 15000); // Polling silent
             setInterval(updateWidgets, 5000);
             setInterval(checkAlarms, 30000);
             
