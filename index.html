@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎓 SGI Cloud Pro v8.9 (Calendar & Gantt Fix)</title>
+    <title>🎓 SGI Cloud Pro v8.9.2 (Clean Bar)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -123,13 +123,13 @@
             border: 1px solid var(--border); 
             border-radius: 12px; 
             overflow: hidden; 
-            grid-auto-rows: minmax(100px, auto); /* Fila consistente */
+            grid-auto-rows: minmax(100px, auto);
         }
         .calendar-day { 
             background: var(--bg-card); 
             padding: 4px; 
             cursor: pointer; 
-            overflow: hidden; /* Evita que crezca a lo ancho */
+            overflow: hidden; 
             display: flex;
             flex-direction: column;
         }
@@ -140,7 +140,7 @@
             margin-bottom: 2px; 
             color: white; 
             cursor: pointer; 
-            white-space: nowrap; /* Cortar texto */
+            white-space: nowrap; 
             overflow: hidden; 
             text-overflow: ellipsis; 
             display: block; 
@@ -186,9 +186,48 @@
         .activity-item { display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid var(--border); align-items: center; transition: background 0.2s; }
         .activity-item:hover { background: rgba(99, 102, 241, 0.05); }
         .item-checkbox { width: 18px; height: 18px; margin-right: 15px; cursor: pointer; accent-color: var(--primary); }
-        .bulk-action-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--bg-sidebar); padding: 10px 25px; border-radius: 50px; display: flex; gap: 12px; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 900; }
+        
+        /* --- BARRA DE ACCIONES MASIVAS (LIMPIA: VERDE Y ROJO) --- */
+        .bulk-action-bar { 
+            position: fixed; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%) translateY(150px); 
+            background: #1e293b; 
+            padding: 8px 16px; 
+            border-radius: 50px; 
+            display: flex; 
+            gap: 12px; 
+            align-items: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            z-index: 2000;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
         .bulk-action-bar.visible { transform: translateX(-50%) translateY(0); }
-        .bulk-count { background: rgba(255,255,255,0.1); color: white; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 0.8rem; }
+        .bulk-action-bar .btn {
+            width: 38px !important;
+            height: 38px !important;
+            border-radius: 50% !important;
+            padding: 0 !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            margin: 0 !important;
+            transform: none !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .bulk-action-bar .btn:hover { transform: scale(1.1) !important; }
+        .bulk-count { 
+            background: rgba(255,255,255,0.15); 
+            color: white; 
+            padding: 4px 10px; 
+            border-radius: 12px; 
+            font-weight: 700; 
+            font-size: 0.85rem; 
+            margin-right: 4px;
+        }
 
         .alarm-modal { position: fixed; inset: 0; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(5px); transition: all 0.3s; }
         .alarm-modal.active { display: flex; }
@@ -221,7 +260,50 @@
         .modal-body { padding: 1.5rem; overflow-y: auto; }
         .form-control { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-body); color: var(--text-main); margin-bottom: 12px; display: block; font-size: 0.9rem;}
 
-        @media (max-width: 900px) { .sidebar { position: fixed; height: 100%; z-index: 60; transform: translateX(-100%); width: 280px; } .sidebar.open { transform: translateX(0); } .dashboard-row { grid-template-columns: 1fr; } .widget-grid-top, .widget-grid-mid { grid-template-columns: 1fr; } }
+        /* HORARIO DE CLASES MEJORADO CON SELECCIÓN MÚLTIPLE */
+        .schedule-table { width:100%; border-collapse:collapse; background:var(--bg-card); border-radius:var(--radius); overflow:hidden; }
+        .schedule-table th { padding:12px; text-align:center; min-width:80px; background:var(--primary); color:white; position:sticky; top:0; z-index:10; }
+        .schedule-table td { padding:12px; text-align:center; border:1px solid var(--border); position:relative; min-width:120px; cursor:pointer; transition:all 0.2s; user-select:none; }
+        .schedule-table td:hover { filter:brightness(0.95); }
+        .schedule-table td.selected { box-shadow:inset 0 0 0 3px var(--primary); z-index:5; }
+        .schedule-table td.editing { box-shadow:0 0 0 2px var(--primary); z-index:20; }
+        
+        .hour-controls { display:flex; flex-direction:column; gap:5px; position:absolute; left:-40px; top:50%; transform:translateY(-50%); }
+        .hour-controls button { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--bg-card); border:1px solid var(--border); cursor:pointer; font-size:0.7rem; }
+        .hour-controls button:hover { background:var(--primary); color:white; }
+        
+        .class-picker { position:fixed; background:var(--bg-card); border:2px solid var(--primary); border-radius:12px; padding:15px; z-index:1000; box-shadow:0 10px 30px rgba(0,0,0,0.2); display:none; flex-wrap:wrap; gap:8px; max-width:300px; max-height:300px; overflow-y:auto; }
+        .class-picker.active { display:flex; }
+        .class-option { padding:8px 12px; border-radius:8px; cursor:pointer; border:1px solid var(--border); transition:all 0.2s; position:relative; }
+        .class-option:hover { transform:scale(1.05); }
+        .class-option .delete-class { position:absolute; top:-5px; right:-5px; background:var(--danger); color:white; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; cursor:pointer; opacity:0; transition:opacity 0.2s; }
+        .class-option:hover .delete-class { opacity:1; }
+        
+        .schedule-actions { display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; }
+        .schedule-actions .btn { padding:8px 12px; font-size:0.8rem; }
+        
+        .time-edit-input { width:80px; padding:4px; border:1px solid var(--border); border-radius:4px; text-align:center; }
+        
+        .selection-info { background:var(--bg-card); padding:10px 15px; border-radius:var(--radius); border:1px solid var(--border); margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; }
+        .selection-info span { font-weight:600; color:var(--primary); }
+        
+        .add-materia-form { display:flex; gap:10px; margin-bottom:15px; }
+        .add-materia-form input { flex:1; }
+        .color-preview { width:30px; height:30px; border-radius:6px; border:2px solid var(--border); cursor:pointer; }
+        
+        .color-palette { display:grid; grid-template-columns:repeat(8, 1fr); gap:5px; margin-top:10px; }
+        .color-palette div { width:25px; height:25px; border-radius:4px; cursor:pointer; border:1px solid rgba(0,0,0,0.1); }
+        
+        @media (max-width: 900px) { 
+            .sidebar { position: fixed; height: 100%; z-index: 60; transform: translateX(-100%); width: 280px; } 
+            .sidebar.open { transform: translateX(0); } 
+            .dashboard-row { grid-template-columns: 1fr; } 
+            .widget-grid-top, .widget-grid-mid { grid-template-columns: 1fr; }
+            .schedule-table { font-size:0.8rem; }
+            .schedule-table th, .schedule-table td { padding:6px; }
+            .hour-controls { left:-30px; }
+            .color-palette { grid-template-columns:repeat(4, 1fr); }
+        }
     </style>
 </head>
 <body>
@@ -234,7 +316,49 @@
         <span id="bulkCount" class="bulk-count">0</span>
         <button class="btn btn-whatsapp" onclick="window.shareSelected('whatsapp')"><i class="fab fa-whatsapp"></i></button>
         <button class="btn btn-mail" onclick="window.shareSelected('email')"><i class="fas fa-envelope"></i></button>
-        <button class="btn btn-secondary" style="color:white; border-color:rgba(255,255,255,0.2)" onclick="window.clearSelection()"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- MODAL PARA AGREGAR NUEVA MATERIA -->
+    <div id="addClassModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">Agregar Nueva Materia <button style="background:none; border:none; font-size:1.5rem;" onclick="window.closeModals()">&times;</button></div>
+            <div class="modal-body">
+                <div class="add-materia-form">
+                    <input type="text" id="newClassName" class="form-control" placeholder="Nombre de la materia" style="flex:1;">
+                    <div id="newClassColorPreview" class="color-preview" style="background:#3b82f6;"></div>
+                    <button class="btn btn-primary" onclick="window.addNewClass()">Agregar</button>
+                </div>
+                
+                <div style="margin-top:20px;">
+                    <label class="form-label">Seleccionar Color</label>
+                    <div class="color-palette">
+                        <div style="background:#3b82f6;" onclick="window.selectClassColor('#3b82f6')"></div>
+                        <div style="background:#6366f1;" onclick="window.selectClassColor('#6366f1')"></div>
+                        <div style="background:#10b981;" onclick="window.selectClassColor('#10b981')"></div>
+                        <div style="background:#f59e0b;" onclick="window.selectClassColor('#f59e0b')"></div>
+                        <div style="background:#ef4444;" onclick="window.selectClassColor('#ef4444')"></div>
+                        <div style="background:#8b5cf6;" onclick="window.selectClassColor('#8b5cf6')"></div>
+                        <div style="background:#ec4899;" onclick="window.selectClassColor('#ec4899')"></div>
+                        <div style="background:#14b8a6;" onclick="window.selectClassColor('#14b8a6')"></div>
+                        <div style="background:#64748b;" onclick="window.selectClassColor('#64748b')"></div>
+                        <div style="background:#84cc16;" onclick="window.selectClassColor('#84cc16')"></div>
+                        <div style="background:#f97316;" onclick="window.selectClassColor('#f97316')"></div>
+                        <div style="background:#06b6d4;" onclick="window.selectClassColor('#06b6d4')"></div>
+                        <div style="background:#8b5cf6;" onclick="window.selectClassColor('#8b5cf6')"></div>
+                        <div style="background:#d946ef;" onclick="window.selectClassColor('#d946ef')"></div>
+                        <div style="background:#0ea5e9;" onclick="window.selectClassColor('#0ea5e9')"></div>
+                        <div style="background:#f1f5f9; border:2px solid #ccc;" onclick="window.selectClassColor('#f1f5f9')"></div>
+                    </div>
+                </div>
+                
+                <div style="margin-top:20px; padding-top:15px; border-top:1px solid var(--border);">
+                    <label class="form-label">Materias Personalizadas</label>
+                    <div id="customClassesList" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
+                        <!-- Lista dinámica de materias personalizadas -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="alarmModal" class="alarm-modal">
@@ -285,6 +409,7 @@
                         <div class="nav-category">Gestión</div>
                         <button class="nav-item" onclick="window.switchView('cases')"><i class="fas fa-book-open"></i> Bitácora <span class="badge" id="sidebarOpenCases" style="margin-left:auto; background:rgba(255,255,255,0.1);">0</span></button>
                         <button class="nav-item" onclick="window.switchView('list')"><i class="fas fa-list-check"></i> Actividades</button>
+                        <button class="nav-item" onclick="window.switchView('schedule')"><i class="fas fa-calendar-week"></i> Horario Clases</button>
                     </div>
                     <div style="margin-top: auto;">
                         <div class="nav-category">Sistema</div>
@@ -386,9 +511,96 @@
                     <div class="gantt-wrapper" id="ganttContainer"></div>
                 </div>
                 
-                 <div id="listView" class="view-container">
+                <div id="listView" class="view-container">
                     <h2 style="margin-bottom:1rem;">Lista de Actividades (Selección)</h2>
                     <div class="card" id="activitiesListContainer"></div>
+                </div>
+
+                <!-- NUEVA VISTA HORARIO DE CLASES MEJORADA CON SELECCIÓN MÚLTIPLE -->
+                <div id="scheduleView" class="view-container">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                        <h2>Horario de Clases Semanal</h2>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn btn-secondary" onclick="window.resetSchedule()"><i class="fas fa-undo"></i> Reiniciar</button>
+                            <button class="btn btn-primary" onclick="window.saveScheduleConfig()"><i class="fas fa-save"></i> Guardar</button>
+                        </div>
+                    </div>
+                    
+                    <div class="selection-info" id="selectionInfo" style="display:none;">
+                        <div>
+                            <span id="selectedCount">0</span> celdas seleccionadas
+                            <span style="margin-left:15px; font-size:0.8rem; color:var(--text-light);">(Ctrl+Click para múltiple selección)</span>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn btn-danger" onclick="window.clearSelectedCells()"><i class="fas fa-trash"></i> Vaciar Seleccionadas</button>
+                            <button class="btn btn-secondary" onclick="window.clearSelection()"><i class="fas fa-times"></i> Deseleccionar</button>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom:1.5rem; background:var(--bg-card); padding:15px; border-radius:var(--radius); border:1px solid var(--border);">
+                        <h3 style="margin-bottom:10px;">Configuración</h3>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+                            <div>
+                                <label class="form-label">Período de Clases</label>
+                                <input type="text" id="schedulePeriod" class="form-control" placeholder="Ej: 2024 - Semestre 1">
+                            </div>
+                            <div>
+                                <label class="form-label">Materia Principal</label>
+                                <input type="text" id="scheduleSubject" class="form-control" placeholder="Ej: Lenguaje y Comunicación">
+                            </div>
+                        </div>
+                        
+                        <div class="schedule-actions">
+                            <button class="btn btn-primary" onclick="window.addScheduleHour()"><i class="fas fa-plus"></i> Agregar Hora</button>
+                            <button class="btn btn-secondary" onclick="window.duplicateLastHour()"><i class="fas fa-copy"></i> Duplicar Última</button>
+                            <button class="btn btn-danger" onclick="window.removeLastHour()"><i class="fas fa-trash"></i> Eliminar Última</button>
+                            <button class="btn btn-secondary" onclick="window.clearAllHours()"><i class="fas fa-broom"></i> Limpiar Todo</button>
+                            <button class="btn btn-primary" onclick="window.openAddClassModal()"><i class="fas fa-plus-circle"></i> Nueva Materia</button>
+                            <button class="btn btn-secondary" onclick="window.showClassPicker()"><i class="fas fa-palette"></i> Selector</button>
+                        </div>
+                        
+                        <div style="margin-top:15px; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                            <span style="font-weight:600; color:var(--text-light);">Modo:</span>
+                            <div style="display:flex; background:var(--bg-body); border-radius:8px; padding:2px;">
+                                <button id="modeSingle" class="btn" style="background:var(--primary); color:white; padding:6px 12px; border-radius:6px;">Selección Simple</button>
+                                <button id="modeMultiple" class="btn" style="background:transparent; padding:6px 12px; border-radius:6px;" onclick="window.toggleSelectionMode(true)">Selección Múltiple</button>
+                            </div>
+                            <span style="margin-left:10px; font-size:0.8rem; color:var(--text-light);">
+                                <i class="fas fa-mouse-pointer"></i> Click normal: Selecciona
+                                <i class="fas fa-mouse-pointer" style="margin-left:10px;"></i> Ctrl+Click: Selección múltiple
+                                <i class="fas fa-backspace" style="margin-left:10px;"></i> Click derecho: Borrar
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="schedule-container" style="overflow-x:auto; position:relative;">
+                        <div id="classPicker" class="class-picker">
+                            <!-- Opciones de materias se generarán dinámicamente -->
+                        </div>
+                        <table class="schedule-table">
+                            <thead>
+                                <tr>
+                                    <th style="min-width:100px;">Hora</th>
+                                    <th>Lunes</th>
+                                    <th>Martes</th>
+                                    <th>Miércoles</th>
+                                    <th>Jueves</th>
+                                    <th>Viernes</th>
+                                    <th>Sábado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scheduleBody">
+                                <!-- Las filas se generarán dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-top:1.5rem; background:var(--bg-card); padding:15px; border-radius:var(--radius); border:1px solid var(--border);">
+                        <h3 style="margin-bottom:10px;">Materias Rápidas</h3>
+                        <div id="quickClassesContainer" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+                            <!-- Materias rápidas se generarán dinámicamente -->
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>
@@ -556,7 +768,7 @@
         notes: [], 
         config: { primary: '#6366f1', sidebar: '#1e293b', backgrounds: {}, alarmType: 'nuclear', profilePic: null, logo: null, subtitle: '' }, 
         lastUpdated: 0, 
-        version: "8.9" 
+        version: "8.9.2" 
     };
     
     let currentDate = new Date();
@@ -564,6 +776,47 @@
     let saveTimeout;
     let flatpickrInstances = {};
     let selectedActivities = new Set(); 
+    let selectedCells = new Set();
+    let isMultipleSelection = false;
+    let isCtrlPressed = false;
+    let quickClassToSet = null;
+
+    // --- HORARIO DE CLASES SEMANAL MEJORADO ---
+    const defaultSchedule = {
+        period: "2024 - Semestre 1",
+        subject: "Lenguaje y Comunicación",
+        hours: [
+            { time: "08:00 - 08:45", mon: "Matemáticas", tue: "Lenguaje", wed: "Historia", thu: "Ciencias", fri: "Inglés", sat: "" },
+            { time: "08:45 - 09:30", mon: "Matemáticas", tue: "Lenguaje", wed: "Historia", thu: "Ciencias", fri: "Inglés", sat: "" },
+            { time: "09:30 - 10:15", mon: "Educación Física", tue: "Artes", wed: "Matemáticas", thu: "Lenguaje", fri: "Taller", sat: "" },
+            { time: "10:15 - 10:45", mon: "RECREO", tue: "RECREO", wed: "RECREO", thu: "RECREO", fri: "RECREO", sat: "" },
+            { time: "10:45 - 11:30", mon: "Ciencias", tue: "Matemáticas", wed: "Lenguaje", thu: "Historia", fri: "Música", sat: "" },
+            { time: "11:30 - 12:15", mon: "Ciencias", tue: "Matemáticas", wed: "Lenguaje", thu: "Historia", fri: "Música", sat: "" },
+            { time: "12:15 - 13:30", mon: "ALMUERZO", tue: "ALMUERZO", wed: "ALMUERZO", thu: "ALMUERZO", fri: "ALMUERZO", sat: "" },
+            { time: "13:30 - 14:15", mon: "Taller", tue: "Ciencias", wed: "Artes", thu: "Matemáticas", fri: "Educación Física", sat: "" },
+            { time: "14:15 - 15:00", mon: "Taller", tue: "Ciencias", wed: "Artes", thu: "Matemáticas", fri: "Educación Física", sat: "" }
+        ]
+    };
+
+    // Inicializar materias personalizadas si no existen
+    if (!db.customClasses) {
+        db.customClasses = [
+            { name: "Matemáticas", color: "#3b82f6" },
+            { name: "Lenguaje", color: "#6366f1" },
+            { name: "Ciencias", color: "#10b981" },
+            { name: "Historia", color: "#f59e0b" },
+            { name: "Inglés", color: "#ef4444" },
+            { name: "Artes", color: "#8b5cf6" },
+            { name: "Música", color: "#ec4899" },
+            { name: "Educación Física", color: "#14b8a6" },
+            { name: "Tecnología", color: "#64748b" },
+            { name: "Taller", color: "#10b981" },
+            { name: "Evaluación", color: "#f59e0b" },
+            { name: "Reunión", color: "#ef4444" },
+            { name: "RECREO", color: "#f1f5f9", textColor: "var(--text-main)" },
+            { name: "ALMUERZO", color: "#f1f5f9", textColor: "var(--text-main)" }
+        ];
+    }
 
     // --- WIDGETS LOGIC ---
     const dailyQuotes = [
@@ -583,12 +836,10 @@
         if (!db || !db.activities) return; 
 
         try {
-            // 1. Pensamiento del Día
             const dayOfMonth = new Date().getDate();
             const qEl = document.getElementById('widgetQuote');
             if(qEl) qEl.textContent = `"${dailyQuotes[dayOfMonth % dailyQuotes.length]}"`;
 
-            // 2. Tarea Cumplida (COMPACT)
             const now = new Date();
             const todayStr = now.toISOString().split('T')[0];
             const nowMinutes = now.getHours() * 60 + now.getMinutes();
@@ -607,7 +858,6 @@
             if(taskCountEl) taskCountEl.textContent = `${completed}/${total}`;
             if(taskBarEl) taskBarEl.style.width = total===0 ? '0%' : `${(completed/total)*100}%`;
 
-            // 3. Countdown
             const countTimeEl = document.getElementById('wdgCountTime');
             const countTitleEl = document.getElementById('wdgCountTitle');
             if(countTimeEl && countTitleEl) {
@@ -624,7 +874,6 @@
                 }
             }
 
-            // 4. Efemérides
             const evtDateEl = document.getElementById('wdgEventDate');
             const evtTitleEl = document.getElementById('wdgEventTitle');
             if(evtDateEl && evtTitleEl) {
@@ -778,6 +1027,8 @@
         if (!data.config) data.config = { primary: '#6366f1', backgrounds: {}, alarmType: 'nuclear', profilePic: null, logo: null, subtitle: '' };
         if (!data.config.backgrounds) data.config.backgrounds = {};
         if (!data.lastUpdated) data.lastUpdated = Date.now();
+        if (!data.customClasses) data.customClasses = [];
+        if (!data.schedule) data.schedule = null;
         return data;
     }
     function updateStatus(status, text) {
@@ -963,6 +1214,653 @@
         window.clearSelection();
     };
 
+    // --- HORARIO DE CLASES FUNCTIONS MEJORADAS CON SELECCIÓN MÚLTIPLE ---
+    function getClassColor(className) {
+        if (!className) return { bg: "#f8fafc", text: "var(--text-main)" };
+        const lower = className.toLowerCase();
+        
+        if (lower.includes("recreo") || lower.includes("almuerzo")) {
+            return { bg: "#f1f5f9", text: "var(--text-main)" };
+        }
+        
+        for (const qc of db.customClasses) {
+            if (lower.includes(qc.name.toLowerCase())) {
+                return { 
+                    bg: qc.color || "#4f46e5", 
+                    text: qc.textColor || "white" 
+                };
+            }
+        }
+        
+        return { bg: "#4f46e5", text: "white" };
+    }
+
+    window.toggleSelectionMode = function(multiple) {
+        isMultipleSelection = multiple;
+        const singleBtn = document.getElementById('modeSingle');
+        const multipleBtn = document.getElementById('modeMultiple');
+        
+        if (multiple) {
+            singleBtn.style.background = 'transparent';
+            singleBtn.style.color = 'var(--text-main)';
+            multipleBtn.style.background = 'var(--primary)';
+            multipleBtn.style.color = 'white';
+            showNotification("Modo selección múltiple activado (Ctrl+Click)", "info", 2000);
+        } else {
+            singleBtn.style.background = 'var(--primary)';
+            singleBtn.style.color = 'white';
+            multipleBtn.style.background = 'transparent';
+            multipleBtn.style.color = 'var(--text-main)';
+            selectedCells.clear();
+            updateSelectionInfo();
+        }
+    };
+
+    window.renderSchedule = function() {
+        const tbody = document.getElementById('scheduleBody');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        selectedCells.clear();
+        
+        let scheduleData = db.schedule || defaultSchedule;
+        
+        const periodInput = document.getElementById('schedulePeriod');
+        const subjectInput = document.getElementById('scheduleSubject');
+        if (periodInput) periodInput.value = scheduleData.period || defaultSchedule.period;
+        if (subjectInput) subjectInput.value = scheduleData.subject || defaultSchedule.subject;
+        
+        scheduleData.hours.forEach((hour, hourIndex) => {
+            const row = document.createElement('tr');
+            row.style.position = 'relative';
+            
+            const timeCell = document.createElement('td');
+            timeCell.style.padding = '12px';
+            timeCell.style.textAlign = 'center';
+            timeCell.style.fontWeight = '600';
+            timeCell.style.background = 'var(--bg-body)';
+            timeCell.style.position = 'relative';
+            
+            const timeInput = document.createElement('input');
+            timeInput.type = 'text';
+            timeInput.className = 'time-edit-input';
+            timeInput.value = hour.time;
+            timeInput.onchange = function() {
+                scheduleData.hours[hourIndex].time = this.value;
+                window.saveScheduleData(scheduleData);
+            };
+            timeInput.onblur = function() {
+                scheduleData.hours[hourIndex].time = this.value;
+                window.saveScheduleData(scheduleData);
+            };
+            
+            timeCell.appendChild(timeInput);
+            
+            const hourControls = document.createElement('div');
+            hourControls.className = 'hour-controls';
+            hourControls.innerHTML = `
+                <button onclick="window.moveHourUp(${hourIndex})" title="Mover arriba"><i class="fas fa-arrow-up"></i></button>
+                <button onclick="window.moveHourDown(${hourIndex})" title="Mover abajo"><i class="fas fa-arrow-down"></i></button>
+                <button onclick="window.deleteHour(${hourIndex})" title="Eliminar hora" style="color:var(--danger);"><i class="fas fa-trash"></i></button>
+            `;
+            timeCell.appendChild(hourControls);
+            
+            row.appendChild(timeCell);
+            
+            const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+            days.forEach((day, dayIndex) => {
+                const cell = document.createElement('td');
+                cell.style.padding = '12px';
+                cell.style.textAlign = 'center';
+                cell.style.cursor = 'pointer';
+                cell.style.position = 'relative';
+                cell.style.minWidth = '120px';
+                cell.dataset.hourIndex = hourIndex;
+                cell.dataset.day = day;
+                
+                const className = hour[day] || '';
+                cell.textContent = className;
+                
+                const colors = getClassColor(className);
+                cell.style.backgroundColor = colors.bg;
+                cell.style.color = colors.text;
+                cell.style.fontWeight = className ? '500' : 'normal';
+                
+                cell.onclick = function(e) {
+                    const cellId = `${hourIndex}-${day}`;
+                    
+                    if (isMultipleSelection || e.ctrlKey || e.metaKey) {
+                        // Selección múltiple
+                        if (selectedCells.has(cellId)) {
+                            selectedCells.delete(cellId);
+                            this.classList.remove('selected');
+                        } else {
+                            selectedCells.add(cellId);
+                            this.classList.add('selected');
+                        }
+                    } else {
+                        // Selección simple
+                        selectedCells.clear();
+                        document.querySelectorAll('.schedule-table td.selected').forEach(td => {
+                            td.classList.remove('selected');
+                        });
+                        
+                        if (quickClassToSet) {
+                            this.textContent = quickClassToSet;
+                            const newColors = getClassColor(quickClassToSet);
+                            this.style.backgroundColor = newColors.bg;
+                            this.style.color = newColors.text;
+                            scheduleData.hours[hourIndex][day] = quickClassToSet;
+                            window.saveScheduleData(scheduleData);
+                            quickClassToSet = null;
+                        } else {
+                            selectedCells.add(cellId);
+                            this.classList.add('selected');
+                        }
+                    }
+                    
+                    updateSelectionInfo();
+                };
+                
+                cell.oncontextmenu = function(e) {
+                    e.preventDefault();
+                    const cellId = `${hourIndex}-${day}`;
+                    
+                    if (selectedCells.size > 1 && selectedCells.has(cellId)) {
+                        // Borrar múltiples celdas seleccionadas
+                        selectedCells.forEach(cellId => {
+                            const [hIdx, d] = cellId.split('-');
+                            const dayStr = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'][parseInt(d)];
+                            scheduleData.hours[parseInt(hIdx)][dayStr] = '';
+                        });
+                        selectedCells.clear();
+                        window.renderSchedule();
+                    } else {
+                        // Borrar una sola celda
+                        this.textContent = '';
+                        this.style.backgroundColor = '#f8fafc';
+                        this.style.color = 'var(--text-main)';
+                        scheduleData.hours[hourIndex][day] = '';
+                    }
+                    window.saveScheduleData(scheduleData);
+                    updateSelectionInfo();
+                    return false;
+                };
+                
+                const colorBtn = document.createElement('button');
+                colorBtn.innerHTML = '<i class="fas fa-palette" style="font-size:0.7rem;"></i>';
+                colorBtn.style.position = 'absolute';
+                colorBtn.style.top = '2px';
+                colorBtn.style.right = '2px';
+                colorBtn.style.background = 'rgba(255,255,255,0.3)';
+                colorBtn.style.border = 'none';
+                colorBtn.style.borderRadius = '3px';
+                colorBtn.style.padding = '2px 4px';
+                colorBtn.style.cursor = 'pointer';
+                colorBtn.style.display = 'none';
+                
+                colorBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    const colors = ['#3b82f6', '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#64748b'];
+                    const currentColor = cell.style.backgroundColor;
+                    const rgb = currentColor.match(/\d+/g);
+                    if (rgb) {
+                        const hex = rgbToHex(parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]));
+                        const currentIndex = colors.findIndex(c => c === hex);
+                        const nextIndex = (currentIndex + 1) % colors.length;
+                        cell.style.backgroundColor = colors[nextIndex];
+                        cell.style.color = 'white';
+                    }
+                };
+                
+                cell.appendChild(colorBtn);
+                cell.onmouseenter = () => {
+                    colorBtn.style.display = 'block';
+                };
+                cell.onmouseleave = () => {
+                    colorBtn.style.display = 'none';
+                };
+                
+                row.appendChild(cell);
+            });
+            
+            tbody.appendChild(row);
+        });
+        
+        updateSelectionInfo();
+        renderQuickClasses();
+        renderCustomClassesList();
+    };
+
+    function updateSelectionInfo() {
+        const infoDiv = document.getElementById('selectionInfo');
+        const countSpan = document.getElementById('selectedCount');
+        
+        if (selectedCells.size > 0) {
+            infoDiv.style.display = 'flex';
+            countSpan.textContent = selectedCells.size;
+        } else {
+            infoDiv.style.display = 'none';
+        }
+    }
+
+    window.clearSelectedCells = function() {
+        if (selectedCells.size === 0) {
+            showNotification("No hay celdas seleccionadas", "warning");
+            return;
+        }
+        
+        if (confirm(`¿Vaciar ${selectedCells.size} celdas seleccionadas?`)) {
+            const scheduleData = db.schedule || defaultSchedule;
+            
+            selectedCells.forEach(cellId => {
+                const [hourIndex, dayIndex] = cellId.split('-');
+                const day = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'][parseInt(dayIndex)];
+                scheduleData.hours[parseInt(hourIndex)][day] = '';
+            });
+            
+            selectedCells.clear();
+            window.saveScheduleData(scheduleData);
+            window.renderSchedule();
+            showNotification(`${selectedCells.size} celdas vaciadas`, "success");
+        }
+    };
+
+    window.clearSelection = function() {
+        selectedCells.clear();
+        document.querySelectorAll('.schedule-table td.selected').forEach(td => {
+            td.classList.remove('selected');
+        });
+        updateSelectionInfo();
+        showNotification("Selección limpiada", "info");
+    };
+
+    function rgbToHex(r, g, b) {
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+
+    function renderClassPicker() {
+        const picker = document.getElementById('classPicker');
+        if (!picker) return;
+        
+        picker.innerHTML = '';
+        db.customClasses.forEach((qc, index) => {
+            const option = document.createElement('div');
+            option.className = 'class-option';
+            option.textContent = qc.name;
+            option.style.backgroundColor = qc.color || '#4f46e5';
+            option.style.color = qc.textColor || 'white';
+            option.onclick = function(e) {
+                e.stopPropagation();
+                
+                if (selectedCells.size > 0) {
+                    // Aplicar a múltiples celdas seleccionadas
+                    const scheduleData = db.schedule || defaultSchedule;
+                    
+                    selectedCells.forEach(cellId => {
+                        const [hourIndex, dayIndex] = cellId.split('-');
+                        const day = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'][parseInt(dayIndex)];
+                        const cell = document.querySelector(`td[data-hour-index="${hourIndex}"][data-day="${day}"]`);
+                        
+                        if (cell) {
+                            cell.textContent = qc.name;
+                            cell.style.backgroundColor = qc.color || '#4f46e5';
+                            cell.style.color = qc.textColor || 'white';
+                            scheduleData.hours[parseInt(hourIndex)][day] = qc.name;
+                        }
+                    });
+                    
+                    window.saveScheduleData(scheduleData);
+                    selectedCells.clear();
+                    updateSelectionInfo();
+                    showNotification(`Aplicado a ${selectedCells.size} celdas`, "success");
+                } else {
+                    // Modo normal - esperar click en celda
+                    quickClassToSet = qc.name;
+                    showNotification(`Selecciona una celda para asignar "${qc.name}"`, "info", 2000);
+                }
+                
+                picker.classList.remove('active');
+            };
+            
+            if (index >= 13) { // Solo mostrar botón de eliminar en materias personalizadas (no las predeterminadas)
+                const deleteBtn = document.createElement('span');
+                deleteBtn.className = 'delete-class';
+                deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                deleteBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    if (confirm(`¿Eliminar la materia "${qc.name}"?`)) {
+                        db.customClasses.splice(index, 1);
+                        window.saveData();
+                        renderClassPicker();
+                        renderQuickClasses();
+                        renderCustomClassesList();
+                        showNotification("Materia eliminada", "success");
+                    }
+                };
+                option.appendChild(deleteBtn);
+            }
+            
+            picker.appendChild(option);
+        });
+    }
+
+    function renderQuickClasses() {
+        const container = document.getElementById('quickClassesContainer');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        db.customClasses.forEach((qc, index) => {
+            const option = document.createElement('div');
+            option.className = 'class-option';
+            option.textContent = qc.name;
+            option.style.backgroundColor = qc.color || '#4f46e5';
+            option.style.color = qc.textColor || 'white';
+            option.style.cursor = 'pointer';
+            option.style.padding = '6px 10px';
+            option.style.borderRadius = '6px';
+            option.style.fontSize = '0.8rem';
+            option.style.transition = 'all 0.2s';
+            
+            option.onclick = function() {
+                quickClassToSet = qc.name;
+                showNotification(`Selecciona celdas para asignar "${qc.name}" (Ctrl+Click para múltiples)`, "info", 3000);
+            };
+            
+            container.appendChild(option);
+        });
+    }
+
+    function renderCustomClassesList() {
+        const container = document.getElementById('customClassesList');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        db.customClasses.slice(13).forEach((qc, index) => { // Mostrar solo las personalizadas
+            const classItem = document.createElement('div');
+            classItem.style.display = 'flex';
+            classItem.style.alignItems = 'center';
+            classItem.style.gap = '8px';
+            classItem.style.padding = '6px 10px';
+            classItem.style.borderRadius = '6px';
+            classItem.style.border = '1px solid var(--border)';
+            classItem.style.background = qc.color || '#4f46e5';
+            classItem.style.color = qc.textColor || 'white';
+            
+            classItem.innerHTML = `
+                <div style="width:12px; height:12px; border-radius:50%; background:${qc.textColor || 'white'};"></div>
+                <span>${qc.name}</span>
+                <button onclick="window.deleteCustomClass(${index + 13})" style="margin-left:auto; background:none; border:none; color:${qc.textColor || 'white'}; cursor:pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(classItem);
+        });
+    }
+
+    window.deleteCustomClass = function(index) {
+        if (index >= db.customClasses.length) return;
+        
+        const className = db.customClasses[index].name;
+        if (confirm(`¿Eliminar la materia "${className}"?`)) {
+            db.customClasses.splice(index, 1);
+            window.saveData();
+            renderClassPicker();
+            renderQuickClasses();
+            renderCustomClassesList();
+            showNotification("Materia eliminada", "success");
+        }
+    };
+
+    window.showClassPicker = function() {
+        const picker = document.getElementById('classPicker');
+        if (!picker) return;
+        
+        const btn = document.querySelector('.schedule-actions .btn:last-child');
+        if (picker.classList.contains('active')) {
+            picker.classList.remove('active');
+        } else {
+            const rect = btn.getBoundingClientRect();
+            picker.style.left = rect.left + 'px';
+            picker.style.top = (rect.bottom + 10) + 'px';
+            picker.classList.add('active');
+        }
+    };
+
+    window.openAddClassModal = function() {
+        document.getElementById('newClassName').value = '';
+        document.getElementById('newClassColorPreview').style.backgroundColor = '#3b82f6';
+        document.getElementById('addClassModal').classList.add('active');
+    };
+
+    window.selectClassColor = function(color) {
+        document.getElementById('newClassColorPreview').style.backgroundColor = color;
+    };
+
+    window.addNewClass = function() {
+        const name = document.getElementById('newClassName').value.trim();
+        const color = document.getElementById('newClassColorPreview').style.backgroundColor;
+        
+        if (!name) {
+            showNotification("Ingresa un nombre para la materia", "warning");
+            return;
+        }
+        
+        // Verificar si ya existe
+        const exists = db.customClasses.some(c => c.name.toLowerCase() === name.toLowerCase());
+        if (exists) {
+            showNotification("Esta materia ya existe", "warning");
+            return;
+        }
+        
+        // Agregar nueva materia
+        const newClass = {
+            name: name,
+            color: color,
+            textColor: color === '#f1f5f9' ? 'var(--text-main)' : 'white'
+        };
+        
+        db.customClasses.push(newClass);
+        window.saveData();
+        
+        // Cerrar modal y actualizar
+        window.closeModals();
+        renderClassPicker();
+        renderQuickClasses();
+        renderCustomClassesList();
+        showNotification(`Materia "${name}" agregada`, "success");
+    };
+
+    window.setQuickClass = function(className) {
+        quickClassToSet = className;
+        showNotification(`Selecciona celdas para asignar "${className}" (Ctrl+Click para múltiples)`, "info", 3000);
+    };
+
+    window.addScheduleHour = function() {
+        if (!db.schedule) db.schedule = { ...defaultSchedule };
+        
+        const lastHour = db.schedule.hours[db.schedule.hours.length - 1];
+        let newTime = "15:00 - 15:45";
+        if (lastHour && lastHour.time) {
+            const times = lastHour.time.split(' - ');
+            if (times.length === 2) {
+                const [start, end] = times;
+                const startTime = parseTime(start);
+                const endTime = parseTime(end);
+                const duration = endTime - startTime;
+                const newStart = startTime + duration;
+                const newEnd = newStart + duration;
+                newTime = `${formatTime(newStart)} - ${formatTime(newEnd)}`;
+            }
+        }
+        
+        db.schedule.hours.push({
+            time: newTime,
+            mon: "", tue: "", wed: "", thu: "", fri: "", sat: ""
+        });
+        
+        window.saveScheduleData(db.schedule);
+        window.renderSchedule();
+    };
+
+    function parseTime(timeStr) {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
+    }
+
+    function formatTime(minutes) {
+        const hrs = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+    }
+
+    window.duplicateLastHour = function() {
+        if (!db.schedule || !db.schedule.hours || db.schedule.hours.length === 0) return;
+        
+        const lastHour = { ...db.schedule.hours[db.schedule.hours.length - 1] };
+        const times = lastHour.time.split(' - ');
+        if (times.length === 2) {
+            const [start, end] = times;
+            const startTime = parseTime(start);
+            const endTime = parseTime(end);
+            const duration = endTime - startTime;
+            const newStart = startTime + duration;
+            const newEnd = newStart + duration;
+            lastHour.time = `${formatTime(newStart)} - ${formatTime(newEnd)}`;
+        }
+        
+        db.schedule.hours.push(lastHour);
+        window.saveScheduleData(db.schedule);
+        window.renderSchedule();
+    };
+
+    window.removeLastHour = function() {
+        if (!db.schedule || !db.schedule.hours || db.schedule.hours.length <= 1) {
+            showNotification("Debe quedar al menos una hora", "warning");
+            return;
+        }
+        
+        db.schedule.hours.pop();
+        window.saveScheduleData(db.schedule);
+        window.renderSchedule();
+    };
+
+    window.clearAllHours = function() {
+        if (confirm("¿Eliminar todas las clases? Esta acción no se puede deshacer.")) {
+            if (!db.schedule) db.schedule = { ...defaultSchedule };
+            db.schedule.hours = db.schedule.hours.map(hour => ({
+                time: hour.time,
+                mon: "", tue: "", wed: "", thu: "", fri: "", sat: ""
+            }));
+            window.saveScheduleData(db.schedule);
+            window.renderSchedule();
+        }
+    };
+
+    window.moveHourUp = function(index) {
+        if (!db.schedule || index <= 0) return;
+        
+        const temp = db.schedule.hours[index];
+        db.schedule.hours[index] = db.schedule.hours[index - 1];
+        db.schedule.hours[index - 1] = temp;
+        
+        window.saveScheduleData(db.schedule);
+        window.renderSchedule();
+    };
+
+    window.moveHourDown = function(index) {
+        if (!db.schedule || index >= db.schedule.hours.length - 1) return;
+        
+        const temp = db.schedule.hours[index];
+        db.schedule.hours[index] = db.schedule.hours[index + 1];
+        db.schedule.hours[index + 1] = temp;
+        
+        window.saveScheduleData(db.schedule);
+        window.renderSchedule();
+    };
+
+    window.deleteHour = function(index) {
+        if (!db.schedule || db.schedule.hours.length <= 1) {
+            showNotification("Debe quedar al menos una hora", "warning");
+            return;
+        }
+        
+        if (confirm("¿Eliminar esta hora del horario?")) {
+            db.schedule.hours.splice(index, 1);
+            window.saveScheduleData(db.schedule);
+            window.renderSchedule();
+        }
+    };
+
+    window.saveScheduleData = function(scheduleData) {
+        db.schedule = scheduleData;
+        window.saveData();
+        window.showNotification("Horario guardado", "success");
+    };
+
+    window.saveScheduleConfig = function() {
+        const period = document.getElementById('schedulePeriod').value;
+        const subject = document.getElementById('scheduleSubject').value;
+        
+        if (!db.schedule) db.schedule = { ...defaultSchedule };
+        
+        db.schedule.period = period || defaultSchedule.period;
+        db.schedule.subject = subject || defaultSchedule.subject;
+        
+        window.saveScheduleData(db.schedule);
+        showNotification("Configuración guardada", "success");
+    };
+
+    window.resetSchedule = function() {
+        if (confirm("¿Restaurar horario predeterminado? Se perderán todos los cambios.")) {
+            db.schedule = { ...defaultSchedule };
+            window.saveScheduleData(db.schedule);
+            window.renderSchedule();
+        }
+    };
+
+    // --- EVENT LISTENERS PARA TECLADO ---
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Control' || e.key === 'Meta') {
+            isCtrlPressed = true;
+        }
+        
+        // Ctrl+A para seleccionar todo en modo horario
+        if ((e.ctrlKey || e.metaKey) && e.key === 'a' && currentViewName === 'schedule') {
+            e.preventDefault();
+            selectedCells.clear();
+            document.querySelectorAll('.schedule-table td').forEach(td => {
+                if (td.cellIndex > 0) { // Excluir columna de horas
+                    const hourIndex = td.dataset.hourIndex;
+                    const day = td.dataset.day;
+                    if (hourIndex && day) {
+                        selectedCells.add(`${hourIndex}-${['mon','tue','wed','thu','fri','sat'].indexOf(day)}`);
+                        td.classList.add('selected');
+                    }
+                }
+            });
+            updateSelectionInfo();
+            showNotification(`${selectedCells.size} celdas seleccionadas`, "info");
+        }
+        
+        // Escape para limpiar selección
+        if (e.key === 'Escape') {
+            window.clearSelection();
+        }
+        
+        // Delete para borrar seleccionadas
+        if (e.key === 'Delete' && selectedCells.size > 0 && currentViewName === 'schedule') {
+            window.clearSelectedCells();
+        }
+    });
+
+    document.addEventListener('keyup', function(e) {
+        if (e.key === 'Control' || e.key === 'Meta') {
+            isCtrlPressed = false;
+        }
+    });
+
     // --- UI RENDER ---
     function initPickers() { 
         const config = { locale: "es", altInput: true, altFormat: "d/m/y", dateFormat: "Y-m-d" };
@@ -978,7 +1876,6 @@
         updateWidgets();
         applyHeaderStyles();
 
-        // Stats
         if(db.cases) {
             const tc = document.getElementById('dashTotalCases'); if(tc) tc.textContent = db.cases.length;
             const oc = document.getElementById('dashOpenCases'); if(oc) oc.textContent = db.cases.filter(c => c.status !== 'closed').length;
@@ -995,7 +1892,6 @@
             const r4=document.getElementById('dashEfemerides'); if(r4) r4.textContent = monthlyActs.filter(a => a.type === 'efemeride').length;
         }
 
-        // Sticky Notes
         const nc = document.getElementById('stickyNotesContainer'); 
         if(nc && db.notes) {
             nc.innerHTML = `<button class="btn btn-secondary" style="width:140px; height:120px; border-style:dashed; font-size:0.8rem; display:flex; align-items:center; justify-content:center;" onclick="window.addStickyNote()">+ Nota</button>`;
@@ -1026,11 +1922,11 @@
         if(currentViewName === 'gantt') window.renderGantt();
         if(currentViewName === 'cases') window.renderCasesTable();
         if(currentViewName === 'list') window.renderActivitiesList();
+        if(currentViewName === 'schedule') window.renderSchedule();
         
         applyBackgrounds();
     };
 
-    // --- CORRECCION GANTT RENDER ---
     window.renderGantt = function() {
         const c = document.getElementById('ganttContainer'); 
         if(!c || !db.activities) return;
@@ -1038,7 +1934,6 @@
         const y = currentDate.getFullYear(), m = currentDate.getMonth();
         const days = new Date(y, m + 1, 0).getDate();
         
-        // Cabecera
         const h = document.createElement('div'); h.className = 'gantt-header';
         h.innerHTML = '<div class="gantt-label" style="background:transparent; border:none;">Actividad</div>';
         for(let d=1; d<=days; d++) { 
@@ -1055,7 +1950,6 @@
         
         const mStart = `${y}-${String(m+1).padStart(2,'0')}-01`, mEnd = `${y}-${String(m+1).padStart(2,'0')}-${days}`;
         
-        // Mapeo Iconos
         const iconMap = {
             'actividad': 'fa-check-square',
             'reunion': 'fa-users',
@@ -1107,7 +2001,6 @@
             bar.style.left = (180 + (startD - 1) * cellWidth) + 'px'; 
             bar.style.width = ((cellWidth * dur) - 6) + 'px';
             
-            // Tooltip
             bar.onmousemove = (e) => {
                 const tt = document.getElementById('ganttTooltip'); 
                 tt.style.display = 'block'; 
