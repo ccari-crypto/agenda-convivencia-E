@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎓 SGI Cloud Pro v8.5 (Auto-Sync)</title>
+    <title>🎓 SGI Cloud Pro v8.6 (Linked)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -30,7 +30,8 @@
         .sidebar { width: 240px; background: var(--bg-sidebar); color: #cbd5e1; display: flex; flex-direction: column; flex-shrink: 0; border-right: 1px solid var(--border); height: 100%; overflow: hidden; }
         .sidebar-content { padding: 1rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1.5rem; }
         .main-content { flex: 1; padding: 1.5rem; overflow-y: auto; height: 100%; background-color: var(--bg-body); background-size: cover; background-position: center; background-attachment: local; position: relative; transition: background-image 0.5s ease-in-out; }
-        
+        .main-content::before { content: ''; position: fixed; inset: 0; background: rgba(255,255,255,0.0); pointer-events: none; z-index: 0; }
+
         /* UI ELEMENTS */
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: var(--transition); border: none; font-size: 0.85rem; }
         .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
@@ -42,11 +43,16 @@
         .btn-sync { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
         .btn-sync:hover { background: var(--success); color: white; }
         .btn-sync.rotating i { animation: spin 1s linear infinite; }
+        .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
         
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
-        
+        /* CONNECTION STATUS */
+        .connection-indicator { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; transition: all 0.3s ease; border: 1px solid transparent; }
+        .status-online { background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.2); }
+        .status-offline { background: rgba(239, 68, 68, 0.1); color: var(--danger); border-color: rgba(239, 68, 68, 0.2); }
+        .status-syncing { background: rgba(245, 158, 11, 0.1); color: var(--warning); border-color: rgba(245, 158, 11, 0.2); }
+
         /* NAV */
         .nav-category { font-size: 0.7rem; text-transform: uppercase; color: #64748b; margin-bottom: 0.5rem; padding-left: 8px; font-weight: 600; }
         .nav-item { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: transparent; border: none; color: #94a3b8; cursor: pointer; border-radius: 10px; font-weight: 500; font-family: inherit; transition: var(--transition); text-align: left; font-size: 0.9rem; }
@@ -187,7 +193,6 @@
                 <button class="btn btn-sync" onclick="window.manualSync()" title="Forzar Sincronización">
                     <i class="fas fa-sync-alt" id="syncIcon"></i> Sincronizar
                 </button>
-                
                 <div id="connectionStatus" class="connection-indicator status-offline" title="Estado de conexión">
                     <i class="fas fa-wifi-slash status-icon"></i> <span style="display:none; @media(min-width:600px){display:inline;}">Offline</span>
                 </div>
@@ -385,9 +390,9 @@
         <div class="modal-container">
             <div class="modal-header">Configuración <button style="background:none; border:none; font-size:1.5rem;" onclick="window.closeModals()">&times;</button></div>
             <div class="modal-body">
+                
                 <h3><i class="fas fa-bell"></i> Alarmas</h3>
                 <div style="margin-bottom:20px;">
-                    <label class="form-label">Estilo de Notificación</label>
                     <select id="configAlarmType" class="form-control" onchange="window.saveConfigAlarm(this.value)">
                         <option value="nuclear">☢️ Nuclear (Intensa)</option>
                         <option value="gentle">🔔 Suave (Flotante)</option>
@@ -399,39 +404,44 @@
 
                 <h3><i class="fas fa-cloud"></i> Sincronización</h3>
                 <div style="background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--primary); margin-bottom: 20px;">
-                    <label class="form-label">GitHub Token</label>
-                    <input type="password" id="githubToken" class="form-control" placeholder="Pegar token ghp_..." onchange="window.saveToken(this.value)">
                     
-                    <label class="form-label" style="margin-top:10px;">Gist ID (Opcional - Para forzar conexión)</label>
-                    <input type="text" id="manualGistId" class="form-control" placeholder="ID de Gist existente...">
-                    
-                    <div style="display:flex; gap:10px; margin-top:10px;">
-                        <button class="btn btn-primary" onclick="window.initCloudSync()" style="flex:1">Conectar</button>
-                        <button class="btn btn-secondary" onclick="window.forceCloudDownload()" title="Descargar"><i class="fas fa-cloud-download-alt"></i></button>
-                        <button class="btn btn-secondary" onclick="window.forceCloudUpload()" title="Subir"><i class="fas fa-cloud-upload-alt"></i></button>
+                    <div style="margin-bottom:15px;">
+                        <label class="form-label" style="font-weight:700;">1. Mis Credenciales</label>
+                        <input type="password" id="githubToken" class="form-control" placeholder="Pegar token ghp_..." onchange="window.saveToken(this.value)">
                     </div>
-                    
-                    <div style="margin-top:10px; font-size:0.75rem; color:var(--text-light);">
-                        <div>Estado: <span id="cloudStatusText">Desconectado</span></div>
-                        <div style="margin-top:4px;">Gist ID Actual: <code id="currentGistIdDisplay" style="user-select:all;">-</code></div>
+
+                    <div style="background:rgba(255,255,255,0.5); padding:10px; border-radius:8px; margin-bottom:15px;">
+                        <label class="form-label" style="color:var(--primary); font-weight:800; font-size:0.8rem;">TU ID DE NUBE (COPIA ESTO EN OTROS DISPOSITIVOS)</label>
+                        <div style="display:flex; gap:5px;">
+                            <code id="currentGistIdDisplay" style="flex:1; background:#fff; padding:5px; border:1px solid #ccc; border-radius:4px; font-size:0.8rem; overflow:hidden; text-overflow:ellipsis;">-</code>
+                            <button class="btn btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('currentGistIdDisplay').textContent); alert('Copiado!')"><i class="fas fa-copy"></i></button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:15px; border-top:1px dashed var(--primary); padding-top:10px;">
+                        <label class="form-label" style="font-weight:700;">2. Vincular Dispositivo (Pegar ID aquí)</label>
+                        <input type="text" id="manualGistId" class="form-control" placeholder="Pegar ID de otro dispositivo...">
+                        <button class="btn btn-primary" onclick="window.manualSync(true)" style="width:100%"><i class="fas fa-link"></i> Forzar Conexión</button>
+                    </div>
+
+                    <div style="margin-top:10px; font-size:0.75rem; text-align:center;">
+                        Estado: <span id="cloudStatusText">Desconectado</span>
                     </div>
                 </div>
 
                 <h3><i class="fas fa-database"></i> Gestión de Datos</h3>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
-                    <button class="btn btn-secondary" onclick="window.exportToCloud()"><i class="fas fa-download"></i> Backup (JSON)</button>
+                    <button class="btn btn-secondary" onclick="window.exportToCloud()"><i class="fas fa-download"></i> Backup</button>
                     <button class="btn btn-secondary" onclick="window.importFromCloud()"><i class="fas fa-upload"></i> Restaurar</button>
                 </div>
                 <button class="btn btn-secondary" onclick="window.removeDuplicates()" style="width:100%; margin-bottom:20px;"><i class="fas fa-broom"></i> Eliminar Duplicados</button>
 
-                <h3><i class="fas fa-image"></i> Fondos de Pantalla</h3>
+                <h3><i class="fas fa-image"></i> Fondos</h3>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
                     <div><label class="form-label">Dashboard</label><input type="file" onchange="window.handleBgUpload(this, 'dashboard')" accept="image/*" class="form-control"></div>
                     <div><label class="form-label">Bitácora</label><input type="file" onchange="window.handleBgUpload(this, 'cases')" accept="image/*" class="form-control"></div>
-                    <div><label class="form-label">Calendario</label><input type="file" onchange="window.handleBgUpload(this, 'calendar')" accept="image/*" class="form-control"></div>
-                    <div><label class="form-label">Gantt</label><input type="file" onchange="window.handleBgUpload(this, 'gantt')" accept="image/*" class="form-control"></div>
                 </div>
-                <button class="btn btn-danger" onclick="window.clearBackgrounds()" style="width:100%">Quitar Todos los Fondos</button>
+                <button class="btn btn-danger" onclick="window.clearBackgrounds()" style="width:100%">Quitar Fondos</button>
                 
                 <div style="text-align: right; margin-top:20px;">
                     <button class="btn btn-primary" onclick="window.closeModals()">Cerrar</button>
@@ -455,7 +465,7 @@
         notes: [], 
         config: { primary: '#6366f1', sidebar: '#1e293b', backgrounds: {}, alarmType: 'nuclear' }, 
         lastUpdated: 0, 
-        version: "8.5" 
+        version: "8.6" 
     };
     
     let currentDate = new Date();
@@ -464,7 +474,7 @@
     let flatpickrInstances = {};
     let selectedActivities = new Set(); 
 
-    // --- WIDGETS LOGIC ---
+    // --- WIDGETS LOGIC (SAFE MODE) ---
     const dailyQuotes = [
         "La educación es el arma más poderosa para cambiar el mundo.",
         "Educar no es llenar un cubo, sino encender un fuego.",
@@ -541,7 +551,7 @@
         }
     }
 
-    // --- ALARM SYSTEM ---
+    // --- ALARM SYSTEM (FIXED) ---
     function checkAlarms() {
         if (!db.activities) return;
         const now = new Date();
@@ -579,12 +589,23 @@
     window.stopAlarm = function() { const m = document.getElementById('alarmModal'); if(m) m.classList.remove('active'); };
     window.saveConfigAlarm = function(val) { if(!db.config) db.config={}; db.config.alarmType = val; window.saveData(); };
 
-    // --- CLOUD MANAGER ---
+    // --- CLOUD MANAGER V2 (FORCE SYNC) ---
     
     // NEW: Manual Sync Button
-    window.manualSync = async function() {
+    window.manualSync = async function(isForced = false) {
         const icon = document.getElementById('syncIcon');
         if(icon) icon.classList.add('fa-spin');
+        
+        // Si es forzado desde Config, leemos el input manual
+        if(isForced) {
+            const manualId = document.getElementById('manualGistId').value.trim();
+            if(manualId) {
+                GIST_ID = manualId;
+                localStorage.setItem('sgi_gist_id', GIST_ID);
+                db.lastUpdated = 0; // Force download
+            }
+        }
+
         await CloudManager.sync(false); // Not silent
         if(icon) icon.classList.remove('fa-spin');
     };
@@ -618,13 +639,6 @@
             if (!GITHUB_TOKEN) return;
             if(!silent) updateStatus('syncing', 'Sync...');
             
-            // Check manual override first
-            const manualId = document.getElementById('manualGistId').value.trim();
-            if(manualId) {
-                GIST_ID = manualId;
-                localStorage.setItem('sgi_gist_id', GIST_ID);
-            }
-
             if (!GIST_ID) { GIST_ID = await this.findGist(); if(!GIST_ID){ await this.createGist(); return; } localStorage.setItem('sgi_gist_id', GIST_ID); }
             
             // Update UI with current ID
@@ -637,11 +651,10 @@
                 if(gistData.files && gistData.files[CLOUD_FILENAME]) {
                     const cloudDB = JSON.parse(gistData.files[CLOUD_FILENAME].content);
                     
-                    // Logic: If cloud is newer, take it.
                     if (cloudDB.lastUpdated > (db.lastUpdated || 0)) {
                         console.log("Downloading new data from cloud...");
                         db = ensureIntegrity(cloudDB); 
-                        saveLocalData(false); // Save locally but don't re-upload
+                        saveLocalData(false); 
                         refreshAllViews(); 
                         if(!silent) showNotification("Datos actualizados", "success");
                     } else if (db.lastUpdated > (cloudDB.lastUpdated || 0)) { 
