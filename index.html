@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎓 SGI Cloud Pro v8.8 (Turbo Sync)</title>
+    <title>🎓 SGI Cloud Pro v8.9 (Calendar & Gantt Fix)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -113,16 +113,74 @@
         
         .cases-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.85rem; }
         .cases-table th, .cases-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); background: var(--bg-card); text-align: left; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--border); gap: 1px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-        .calendar-day { min-height: 100px; background: var(--bg-card); padding: 4px; cursor: pointer; }
-        .cal-event { padding: 2px 5px; font-size: 0.65rem; border-radius: 3px; margin-bottom: 2px; color: white; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; position: relative; }
+
+        /* --- CORRECCION CALENDARIO --- */
+        .calendar-grid { 
+            display: grid; 
+            grid-template-columns: repeat(7, 1fr); 
+            background: var(--border); 
+            gap: 1px; 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            overflow: hidden; 
+            grid-auto-rows: minmax(100px, auto); /* Fila consistente */
+        }
+        .calendar-day { 
+            background: var(--bg-card); 
+            padding: 4px; 
+            cursor: pointer; 
+            overflow: hidden; /* Evita que crezca a lo ancho */
+            display: flex;
+            flex-direction: column;
+        }
+        .cal-event { 
+            padding: 2px 5px; 
+            font-size: 0.75rem; 
+            border-radius: 3px; 
+            margin-bottom: 2px; 
+            color: white; 
+            cursor: pointer; 
+            white-space: nowrap; /* Cortar texto */
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            display: block; 
+            position: relative; 
+            max-width: 100%;
+        }
+
         .custom-tooltip { position: fixed; background: rgba(15, 23, 42, 0.95); color: white; padding: 10px 14px; border-radius: 6px; font-size: 0.8rem; z-index: 9999; pointer-events: none; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); max-width: 250px; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1); line-height: 1.4; }
+        
         .gantt-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); }
         .gantt-header { display: flex; border-bottom: 1px solid var(--border); background: var(--bg-body); }
         .gantt-cell { flex: 1; min-width: 35px; padding: 4px; text-align: center; border-right: 1px solid var(--border); font-size: 0.7rem; }
         .gantt-row { display: flex; border-bottom: 1px solid var(--border); height: 36px; position: relative; align-items: center; }
-        .gantt-bar { position: absolute; height: 24px; border-radius: 4px; top: 6px; font-size: 0.75rem; color: white; cursor: pointer; z-index: 5; display: flex; align-items: center; padding: 0 6px; white-space: nowrap; overflow: hidden; transition: filter 0.2s; }
-        .gantt-bar:hover { filter: brightness(115%); z-index: 10; }
+        
+        /* --- CORRECCION GANTT --- */
+        .gantt-bar { 
+            position: absolute; 
+            height: 24px; 
+            border-radius: 4px; 
+            top: 6px; 
+            font-size: 0.75rem; 
+            color: white; 
+            cursor: pointer; 
+            z-index: 5; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            padding: 0 8px; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            transition: filter 0.2s, transform 0.2s, z-index 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .gantt-bar:hover { 
+            filter: brightness(115%); 
+            z-index: 50; 
+            transform: scale(1.02); 
+        }
+        .gantt-bar i { font-size: 0.85rem; }
+        
         .gantt-label { width: 180px; flex-shrink: 0; padding: 0 8px; font-size: 0.8rem; font-weight: 500; border-right: 1px solid var(--border); background: var(--bg-card); position: sticky; left: 0; z-index: 10; display: flex; align-items: center; height: 100%; }
 
         .activity-item { display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid var(--border); align-items: center; transition: background 0.2s; }
@@ -498,7 +556,7 @@
         notes: [], 
         config: { primary: '#6366f1', sidebar: '#1e293b', backgrounds: {}, alarmType: 'nuclear', profilePic: null, logo: null, subtitle: '' }, 
         lastUpdated: 0, 
-        version: "8.8" 
+        version: "8.9" 
     };
     
     let currentDate = new Date();
@@ -507,7 +565,7 @@
     let flatpickrInstances = {};
     let selectedActivities = new Set(); 
 
-    // --- WIDGETS LOGIC (SAFE MODE) ---
+    // --- WIDGETS LOGIC ---
     const dailyQuotes = [
         "La educación es el arma más poderosa para cambiar el mundo.",
         "Educar no es llenar un cubo, sino encender un fuego.",
@@ -584,7 +642,7 @@
         }
     }
 
-    // --- ALARM SYSTEM (FIXED) ---
+    // --- ALARM SYSTEM ---
     function checkAlarms() {
         if (!db.activities) return;
         const now = new Date();
@@ -622,24 +680,22 @@
     window.stopAlarm = function() { const m = document.getElementById('alarmModal'); if(m) m.classList.remove('active'); };
     window.saveConfigAlarm = function(val) { if(!db.config) db.config={}; db.config.alarmType = val; window.saveData(); };
 
-    // --- CLOUD MANAGER V2 (FORCE SYNC) ---
+    // --- CLOUD MANAGER ---
     
-    // NEW: Manual Sync Button
     window.manualSync = async function(isForced = false) {
         const icon = document.getElementById('syncIcon');
         if(icon) icon.classList.add('fa-spin');
         
-        // Si es forzado desde Config, leemos el input manual
         if(isForced) {
             const manualId = document.getElementById('manualGistId').value.trim();
             if(manualId) {
                 GIST_ID = manualId;
                 localStorage.setItem('sgi_gist_id', GIST_ID);
-                db.lastUpdated = 0; // Force download
+                db.lastUpdated = 0; 
             }
         }
 
-        await CloudManager.sync(false); // Not silent
+        await CloudManager.sync(false); 
         if(icon) icon.classList.remove('fa-spin');
     };
 
@@ -674,7 +730,6 @@
             
             if (!GIST_ID) { GIST_ID = await this.findGist(); if(!GIST_ID){ await this.createGist(); return; } localStorage.setItem('sgi_gist_id', GIST_ID); }
             
-            // Update UI with current ID
             const disp = document.getElementById('currentGistIdDisplay');
             if(disp) disp.textContent = GIST_ID;
 
@@ -751,7 +806,6 @@
 
     function saveLocalData(triggerCloud = true) {
         localStorage.setItem('sgi_data', JSON.stringify(db));
-        // TURBO SYNC: Upload after 1 second (1000ms) instead of 2000ms
         if (triggerCloud && GITHUB_TOKEN) { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { CloudManager.upload(); }, 1000); }
     }
     window.saveData = function() { db.lastUpdated = Date.now(); saveLocalData(true); refreshAllViews(); };
@@ -771,7 +825,6 @@
         reader.readAsDataURL(file);
     };
 
-    // Funciones nuevas para personalización
     window.handleProfileUpload = function(input) {
         const file = input.files[0];
         if(!file) return;
@@ -818,7 +871,6 @@
     window.clearBackgrounds = function() { if(db.config) db.config.backgrounds = {}; window.saveData(); };
     
     function applyHeaderStyles() {
-        // Profile Pic
         const icon = document.getElementById('defaultIcon');
         const img = document.getElementById('profilePicImg');
         if(db.config && db.config.profilePic) {
@@ -830,7 +882,6 @@
             img.style.display = 'none';
         }
 
-        // Center Logo
         const logo = document.getElementById('headerLogoCenter');
         if(db.config && db.config.logo) {
             logo.src = db.config.logo;
@@ -839,7 +890,6 @@
             logo.style.display = 'none';
         }
 
-        // Subtitle
         const sub = document.getElementById('appSubtitleDisplay');
         if(sub) sub.textContent = (db.config && db.config.subtitle) ? db.config.subtitle : '';
     }
@@ -923,12 +973,9 @@
     }
 
     window.refreshAllViews = function() {
-        if (!db) return; // Safety check
+        if (!db) return; 
 
-        // Update New Widgets
         updateWidgets();
-
-        // Apply Custom Header
         applyHeaderStyles();
 
         // Stats
@@ -983,43 +1030,107 @@
         applyBackgrounds();
     };
 
+    // --- CORRECCION GANTT RENDER ---
     window.renderGantt = function() {
         const c = document.getElementById('ganttContainer'); 
         if(!c || !db.activities) return;
         c.innerHTML = '';
         const y = currentDate.getFullYear(), m = currentDate.getMonth();
         const days = new Date(y, m + 1, 0).getDate();
+        
+        // Cabecera
         const h = document.createElement('div'); h.className = 'gantt-header';
         h.innerHTML = '<div class="gantt-label" style="background:transparent; border:none;">Actividad</div>';
-        for(let d=1; d<=days; d++) { const cell = document.createElement('div'); cell.className='gantt-cell'; cell.textContent=d; h.appendChild(cell); }
+        for(let d=1; d<=days; d++) { 
+            const cell = document.createElement('div'); 
+            cell.className='gantt-cell'; 
+            cell.textContent=d; 
+            const currentDayDate = new Date(y, m, d);
+            if(currentDayDate.getDay() === 0 || currentDayDate.getDay() === 6) {
+                cell.style.backgroundColor = "rgba(0,0,0,0.03)";
+            }
+            h.appendChild(cell); 
+        }
         c.appendChild(h);
         
         const mStart = `${y}-${String(m+1).padStart(2,'0')}-01`, mEnd = `${y}-${String(m+1).padStart(2,'0')}-${days}`;
-        db.activities.filter(a => { if (!a.date) return false; const s = a.date, e = a.endDate || a.date; return (s <= mEnd && e >= mStart); }).forEach(act => {
+        
+        // Mapeo Iconos
+        const iconMap = {
+            'actividad': 'fa-check-square',
+            'reunion': 'fa-users',
+            'entrevista': 'fa-comments',
+            'plazo': 'fa-hourglass-half',
+            'efemeride': 'fa-flag'
+        };
+
+        db.activities.filter(a => { 
+            if (!a.date) return false; 
+            const s = a.date, e = a.endDate || a.date; 
+            return (s <= mEnd && e >= mStart); 
+        }).forEach(act => {
             const r = document.createElement('div'); r.className='gantt-row';
-            const l = document.createElement('div'); l.className='gantt-label'; l.textContent=act.title; r.appendChild(l);
-            for(let d=1; d<=days; d++) r.appendChild(document.createElement('div'));
+            
+            const l = document.createElement('div'); l.className='gantt-label'; 
+            l.innerHTML = `<span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${act.title}</span>`;
+            r.appendChild(l);
+            
+            for(let d=1; d<=days; d++) {
+                const bgCell = document.createElement('div');
+                bgCell.style.flex = "1";
+                bgCell.style.borderRight = "1px solid var(--border)";
+                const currentDayDate = new Date(y, m, d);
+                if(currentDayDate.getDay() === 0 || currentDayDate.getDay() === 6) {
+                    bgCell.style.backgroundColor = "rgba(0,0,0,0.03)";
+                }
+                r.appendChild(bgCell);
+            }
             
             const s = new Date(act.date), e = act.endDate ? new Date(act.endDate) : new Date(act.date);
             const vs = new Date(y, m, 1), ve = new Date(y, m, days);
+            
             if (e < vs || s > ve) return; 
+            
             let startD = s < vs ? 1 : s.getDate(); 
             let effEnd = e > ve ? ve : e; 
             const dur = Math.floor((effEnd - (s < vs ? vs : s)) / (1000 * 60 * 60 * 24)) + 1;
             
-            const bar = document.createElement('div'); bar.className='gantt-bar';
+            const bar = document.createElement('div'); 
+            bar.className='gantt-bar';
             bar.style.backgroundColor = act.color || 'var(--primary)';
-            bar.textContent = act.title;
-            bar.style.left = (180 + (startD - 1) * 35) + 'px'; 
-            bar.style.width = ((35 * dur) - 4) + 'px';
             
+            const iconClass = iconMap[act.type] || 'fa-circle';
+            bar.innerHTML = `<i class="fas ${iconClass}"></i> <span>${act.title}</span>`;
+            
+            const cellWidth = c.querySelector('.gantt-cell').offsetWidth || 35; 
+            
+            bar.style.left = (180 + (startD - 1) * cellWidth) + 'px'; 
+            bar.style.width = ((cellWidth * dur) - 6) + 'px';
+            
+            // Tooltip
             bar.onmousemove = (e) => {
-                const tt = document.getElementById('ganttTooltip'); tt.style.display = 'block'; tt.style.left = e.pageX + 10 + 'px'; tt.style.top = e.pageY + 10 + 'px';
-                tt.innerHTML = `<strong>${act.title}</strong><br>${window.formatDate(act.date)} ${act.time||''}<br><em>${act.description||''}</em>`;
+                const tt = document.getElementById('ganttTooltip'); 
+                tt.style.display = 'block'; 
+                let leftPos = e.pageX + 15;
+                if(leftPos + 200 > window.innerWidth) leftPos = e.pageX - 210;
+                tt.style.left = leftPos + 'px'; 
+                tt.style.top = (e.pageY + 10) + 'px';
+                
+                tt.innerHTML = `
+                    <div style="border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:4px; margin-bottom:4px;">
+                        <i class="fas ${iconClass}"></i> <strong>${act.title}</strong>
+                    </div>
+                    <div>Inicio: ${window.formatDate(act.date)} ${act.time||''}</div>
+                    ${act.endDate ? `<div>Fin: ${window.formatDate(act.endDate)}</div>` : ''}
+                    <div style="margin-top:4px; font-style:italic; font-size:0.75rem; color:#cbd5e1;">${act.description || 'Sin descripción'}</div>
+                `;
             };
+            
             bar.onmouseleave = () => { document.getElementById('ganttTooltip').style.display = 'none'; };
             bar.onclick = () => window.editActivity(act.id);
-            r.appendChild(bar); c.appendChild(r);
+            
+            r.appendChild(bar); 
+            c.appendChild(r);
         });
     };
 
@@ -1043,7 +1154,6 @@
                 ev.style.backgroundColor = a.color || 'var(--primary)'; ev.textContent = a.title;
                 ev.onclick = (e) => { e.stopPropagation(); window.editActivity(a.id); };
                 
-                // TOOLTIP CALENDARIO
                 ev.onmousemove = (e) => {
                     const tt = document.getElementById('calendarTooltip'); 
                     tt.style.display = 'block'; 
@@ -1112,8 +1222,6 @@
 
     window.saveToken = function(val) { GITHUB_TOKEN = val.trim(); localStorage.setItem('sgi_github_token', GITHUB_TOKEN); };
     window.initCloudSync = function() { if(!GITHUB_TOKEN) { alert("Ingresa un token primero"); return; } CloudManager.sync(); };
-    window.forceCloudDownload = async function() { if(confirm("Reemplazar local con nube?")) { db.lastUpdated = 0; await CloudManager.sync(); } };
-    window.forceCloudUpload = async function() { if(confirm("Sobrescribir nube con local?")) { db.lastUpdated = Date.now() + 10000; await CloudManager.upload(); } };
     window.openConfigModal = function() { 
         document.getElementById('githubToken').value = GITHUB_TOKEN; 
         if(db.config && db.config.alarmType) document.getElementById('configAlarmType').value = db.config.alarmType;
@@ -1183,13 +1291,12 @@
         try {
             const localData = localStorage.getItem('sgi_data');
             if (localData) {
-                // Critical Fix: Try-Catch JSON Parse
                 try {
                     db = ensureIntegrity(JSON.parse(localData));
                 } catch (e) {
                     console.error("Corrupt Data:", e);
                     showNotification("Datos corruptos reiniciados", "danger");
-                    db = ensureIntegrity({}); // Reset
+                    db = ensureIntegrity({}); 
                 }
             } else {
                 db = ensureIntegrity({});
@@ -1200,7 +1307,6 @@
             
             if (GITHUB_TOKEN) { await CloudManager.sync(); } else { showNotification("⚠️ Token no configurado", "warning"); updateStatus('offline', 'Local'); }
             
-            // UI Listeners
             const btnSidebar = document.getElementById('toggleSidebar');
             if(btnSidebar) btnSidebar.addEventListener('click', () => { 
                 const sb = document.getElementById('sidebar');
@@ -1216,8 +1322,7 @@
                 document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark'); 
             });
             
-            // Start Intervals safely - 3 seconds polling (Rapid Sync)
-            setInterval(() => { if(GITHUB_TOKEN) CloudManager.sync(true); }, 3000); // Polling silent every 3s
+            setInterval(() => { if(GITHUB_TOKEN) CloudManager.sync(true); }, 3000); 
             setInterval(updateWidgets, 5000);
             setInterval(checkAlarms, 30000);
             
